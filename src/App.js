@@ -6,21 +6,28 @@ import './App.css';
 
 const App = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    zipCode: '',
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('formData');
+    return savedData ? JSON.parse(savedData) : {
+      name: '',
+      email: '',
+      phone: '',
+      addressLine1: '',
+      addressLine2: '',
+      city: '',
+      state: '',
+      zipCode: '',
+    };
   });
+  
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const savedData = localStorage.getItem('formData');
     if (savedData) {
+     console.log(savedData)
       setFormData(JSON.parse(savedData));
     }
   }, []);
@@ -73,10 +80,11 @@ const App = () => {
     e.preventDefault();
     if (validateStep()) {
       console.log('Form submitted:', formData);
-      // Here you would typically send the data to a server
+      setIsSubmitted(true);
+     
     }
   };
-
+  
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -106,40 +114,50 @@ const App = () => {
     <div className="app">
       <h1>Multi-Step Form</h1>
       <div className="form-container">
-        <div className="tab-navigation">
-          <button className={step === 1 ? 'active' : ''} onClick={() => setStep(1)} disabled={step < 1}>
-            Personal Info
-          </button>
-          <button className={step === 2 ? 'active' : ''} onClick={() => setStep(2)} disabled={step < 2}>
-            Address Info
-          </button>
-          <button className={step === 3 ? 'active' : ''} onClick={() => setStep(3)} disabled={step < 3}>
-            Confirmation
-          </button>
-        </div>
-        <form onSubmit={handleSubmit}>
-          {renderStep()}
-          <div className="navigation-buttons">
-            {step > 1 && (
-              <button type="button" onClick={handleBack}>
-                Back
-              </button>
-            )}
-            {step < 3 && (
-              <button type="button" onClick={handleNext}>
-                Next
-              </button>
-            )}
-            {step === 3 && (
-              <button type="submit">
-                Submit
-              </button>
-            )}
+        {isSubmitted ? (
+          <div className="success-message">
+            <h2>Submitted Successfully!</h2>
+            <p>Your form has been submitted.</p>
           </div>
-        </form>
+        ) : (
+          <>
+            <div className="tab-navigation">
+              <button className={step === 1 ? 'active' : ''} onClick={() => setStep(1)} disabled={step < 1}>
+                Personal Info
+              </button>
+              <button className={step === 2 ? 'active' : ''} onClick={() => setStep(2)} disabled={step < 2}>
+                Address Info
+              </button>
+              <button className={step === 3 ? 'active' : ''} onClick={() => setStep(3)} disabled={step < 3}>
+                Confirmation
+              </button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              {renderStep()}
+              <div className="navigation-buttons">
+                {step > 1 && (
+                  <button type="button" onClick={handleBack}>
+                    Back
+                  </button>
+                )}
+                {step < 3 && (
+                  <button type="button" onClick={handleNext}>
+                    Next
+                  </button>
+                )}
+                {step === 3 && (
+                  <button type="submit">
+                    Submit
+                  </button>
+                )}
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
+   
 };
 
 export default App;
